@@ -99,7 +99,10 @@ export class RestClient {
   /** Download a file's raw bytes. */
   async downloadFile(fileServerRelative: string): Promise<Buffer> {
     const literal = odataPathLiteral(fileServerRelative);
-    const url = `${this.siteUrl}/_api/web/GetFileByServerRelativeUrl(${literal})/$value`;
+    // GetFileByServerRelativePath(decodedurl=...) is the modern endpoint: it
+    // handles names with special characters (including literal `%`) that the
+    // legacy GetFileByServerRelativeUrl mangles and returns 404 for.
+    const url = `${this.siteUrl}/_api/web/GetFileByServerRelativePath(decodedurl=${literal})/$value`;
     const res = await this.request.get(url, { timeout: this.timeout });
     if (!res.ok()) {
       throw new Error(

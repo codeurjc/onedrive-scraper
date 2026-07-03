@@ -10,9 +10,22 @@ import type { OneDriveScraperOptions, ResolvedLocation } from "./types.js";
 
 const WEB_PREFIXES = ["personal", "sites", "teams"];
 
+/**
+ * Decode percent-escapes, tolerating strings that are already decoded and may
+ * contain a stray `%` (SharePoint REST returns `ServerRelativeUrl` decoded, so
+ * a name like `50%.pdf` would otherwise make `decodeURIComponent` throw).
+ */
+function safeDecode(s: string): string {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
+
 /** Normalise a server-relative path: leading slash, no trailing slash, collapse `//`. */
 export function normalizeServerRelative(path: string): string {
-  let p = decodeURIComponent(path.trim());
+  let p = safeDecode(path.trim());
   p = p.replace(/\\/g, "/").replace(/\/+/g, "/");
   if (!p.startsWith("/")) p = "/" + p;
   if (p.length > 1 && p.endsWith("/")) p = p.slice(0, -1);
