@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.log
+
+# Persisted browser session (contains auth cookies — never commit)
+.onedrive-session/
+*.session/
+
+# Local downloads
+downloads/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
