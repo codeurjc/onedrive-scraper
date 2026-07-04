@@ -4,6 +4,7 @@ dist/
 
 # Persisted browser session (contains auth cookies — never commit)
 .onedrive-session/
+.urjc-session/
 *.session/
 
 # Local downloads
