@@ -89,11 +89,16 @@ export class BrowserSession {
   }
 
   /** True when the current session can call the SharePoint REST API. */
-  async isAuthenticated(): Promise<boolean> {
+  async isAuthenticated(navigate = true): Promise<boolean> {
     const page = this.page;
-    try {
-      await this.ensureOnOrigin();
-    } catch {
+    if (navigate) {
+      try {
+        await this.ensureOnOrigin();
+      } catch {
+        return false;
+      }
+    } else if (!page.url().startsWith(this.options.origin)) {
+      // The user is still on the login/MFA pages: don't yank them away.
       return false;
     }
     if (this.looksLikeLoginPage(page.url())) return false;
@@ -147,7 +152,9 @@ export class BrowserSession {
     const deadline = Date.now() + this.options.loginTimeout;
     while (Date.now() < deadline) {
       await this.page.waitForTimeout(2000);
-      if (await this.isAuthenticated()) {
+      // Don't navigate while polling: redirecting to siteUrl from the Microsoft
+      // login page would reload it endlessly and make login impossible.
+      if (await this.isAuthenticated(false)) {
         this.log("[onedrive-scraper] Login successful. Session persisted.");
         return;
       }
